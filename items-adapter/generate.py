@@ -45,13 +45,13 @@ def forward(old: json, new: json, legacy_conversion: Dict[str,str]) -> Dict[str,
 
 def main():
 	versions = get_mc_data_versions()
-	versions.sort(key=lambda s: list(map(int, s.split('.'))))
-
 	versions.remove('1.7') # old version
-	versions.remove('1.15') # no item file
-	versions.remove('1.16') # no item file
+	versions.remove('1.15') ; versions.append('1.15.2') # no item file
+	versions.remove('1.16') ; versions.append('1.16.2') # no item file
+	versions.sort(key=lambda s: list(map(int, s.split('.'))))
 	print(versions)
 
+	conversion_queue = [None] # the first version won't have a conversion queue
 	legacy_conversion = legacy_minecraft_data_conversion()
 	for i in range(len(versions)-1):
 		print(f"[v] Getting {versions[i]}...")
@@ -59,7 +59,13 @@ def main():
 		new = get_mc_data(versions[i+1])
 
 		conversion = forward(old, new, legacy_conversion)
-		#print(conversion)
+		conversion_queue.append(conversion)
+
+	element = 'grass_block'
+	for (version,conversion) in reversed(list(zip(versions,conversion_queue))):
+		print(f"In {version}, it is called {element}")
+		if conversion is not None:
+			element = conversion[element]
 
 	#print(get_spigot_enum_json())
 
