@@ -152,9 +152,16 @@ def get_legacy_conversion() -> Dict[str,str]:
 	offset = 0
 	while offset < len(contents):
 		(e,offset) = LegacyConversionEntry.read_element(contents, offset=offset)
+
+		# TODO add extra ones (e.g. "Wooden Planks"/"planks" is "OAK_PLANKS", with only known alias "wood")
+
 		entries.append(e)
-	print(entries)
+	#print(entries)
 
-	# TODO add extra ones (e.g. "Wooden Planks"/"planks" is "OAK_PLANKS", with only known alias "wood")
+	conversion = {}
+	for entry in entries:
+		if not entry.default_sub_id: continue
+		for alias in entry.aliases:
+			conversion[alias] = entry.name
 
-	return None
+	return conversion
