@@ -15,17 +15,15 @@ def get_mc_data_versions() -> List[str]:
 	github_url = "https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/"
 
 	result = urlopen(github_url)
-	contents = result.read()
-	#print(f"[v] {contents}")
+	contents = result.read().decode('utf-8')
 
-	soup = BeautifulSoup(contents, 'html.parser')
-	version_folders = soup.find_all(title=re.compile("^1\.\d+$")) # get all the firsts versions
+	#soup = BeautifulSoup(contents, 'html.parser')
+	#print(soup.prettify())
 
-	filename = []
-	for i in version_folders:
-			filename.append(i.extract().get_text())
+	#version_folders = soup.find_all(title=re.compile("^1\.\d+$")) # get all the firsts versions
+	#return [i.extract().get_text() for i in version_folders]
 
-	return filename
+	return re.findall(r'"name":"(1\.\d+)"', contents)
 
 def get_mc_data(version: str) -> json:
 	url = f"https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/{version}/items.json"
