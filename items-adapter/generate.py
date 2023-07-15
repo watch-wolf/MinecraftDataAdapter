@@ -54,20 +54,21 @@ def main():
 	conversion_queue = [None] # the first version won't have a conversion queue
 	legacy_conversion = legacy_minecraft_data_conversion()
 	for i in range(len(versions)-1):
-		print(f"[v] Getting {versions[i]}...")
+		print(f"[v] Getting {versions[i+1]} to {versions[i]}...")
 		old = get_mc_data(versions[i])
 		new = get_mc_data(versions[i+1])
 
 		conversion = forward(old, new, legacy_conversion)
 		conversion_queue.append(conversion)
 
-	element = 'grass_block'
+	conversion_queue.append( forward(get_mc_data(versions[-1]), get_spigot_enum_json(), legacy_conversion={}) ) # spigot to Mineflayer 1.20
+	versions.append('Spigot')
+
+	element = 'oak_BOAT'.lower()
 	for (version,conversion) in reversed(list(zip(versions,conversion_queue))):
 		print(f"In {version}, it is called {element}")
 		if conversion is not None:
 			element = conversion[element]
-
-	#print(get_spigot_enum_json())
 
 if __name__ == '__main__':
 	main()

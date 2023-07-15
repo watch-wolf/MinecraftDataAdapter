@@ -63,8 +63,17 @@ def get_spigot_enum() -> List[str]:
 		    [ i.getText() for i in enum_table ]
 		))
 
+def _enum_name_to_display_name(name: str) -> str:
+	return name.replace('_', ' ').title()
+
 def get_spigot_enum_json() -> json:
-	return None # TODO
+	data = []
+	for material in get_spigot_enum():
+		data.append({
+			'name': material.lower(),
+			'displayName': _enum_name_to_display_name(material)
+		})
+	return data
 
 class LegacyConversionEntry:
 	def __init__(self, name: str, aliases: List[str], sub_id: int = None):
