@@ -10,11 +10,13 @@ from urllib.error import HTTPError,URLError
 from socket import timeout as timedout
 import json
 import math
+from filecache import filecache
 
 # get github folders
 from bs4 import BeautifulSoup
 import re
 
+@filecache
 def get_website_contents(url: str, timeout: int = 5) -> str:
 	tries = 10
 	while tries > 0:
@@ -60,6 +62,9 @@ def get_spigot_enum() -> List[str]:
 	return list(filter(lambda e : not e.startswith('LEGACY_') and e != 'Enum Constant',
 		    [ i.getText() for i in enum_table ]
 		))
+
+def get_spigot_enum_json() -> json:
+	return None # TODO
 
 class LegacyConversionEntry:
 	def __init__(self, name: str, aliases: List[str], sub_id: int = None):
@@ -152,9 +157,6 @@ def get_legacy_conversion() -> Dict[str,str]:
 	offset = 0
 	while offset < len(contents):
 		(e,offset) = LegacyConversionEntry.read_element(contents, offset=offset)
-
-		# TODO add extra ones (e.g. "Wooden Planks"/"planks" is "OAK_PLANKS", with only known alias "wood")
-
 		entries.append(e)
 	#print(entries)
 
@@ -165,3 +167,46 @@ def get_legacy_conversion() -> Dict[str,str]:
 			conversion[alias] = entry.name
 
 	return conversion
+
+def legacy_minecraft_data_conversion() -> Dict[str,str]:
+	return {
+		'planks': 'oak_planks',
+		'sapling': 'oak_sapling',
+		'log': 'oak_log',
+		'leaves': 'oak_leaves',
+		'wool': 'white_wool',
+		'mob_spawner': 'spawner',
+		'wooden_pressure_plate': 'oak_pressure_plate',
+		'stained_glass': 'white_stained_glass',
+		'trapdoor': 'oak_trapdoor',
+		'wooden_slab': 'oak_slab',
+		'wooden_button': 'oak_button',
+		'stained_glass_pane': 'white_stained_glass_pane',
+		'leaves2': 'acacia_leaves',
+		'log2': 'acacia_log',
+		'carpet': 'white_carpet',
+		'hardened_clay': 'terracotta',
+		'stained_hardened_clay': 'white_terracotta',
+		'double_plant': 'sunflower',
+		'boat': 'oak_boat',
+		'reeds': 'sugar_cane',
+		'fish': 'cod',
+		'cooked_fish': 'cooked_cod',
+		'dye': 'ink_sac', # black dye
+		'bed': 'red_bed',
+		'speckled_melon': 'glistering_melon_slice',
+		'monster_egg': 'pig_spawn_egg',
+		'spawn_egg': 'pig_spawn_egg',
+		'zombie_pigman_spawn_egg': 'zombified_piglin_spawn_egg',
+		'skull': 'skeleton_skull',
+		'banner': 'white_banner',
+		'red_nether_brick': 'red_nether_bricks',
+		'silver_glazed_terracotta': 'light_gray_glazed_terracotta',
+		'concrete': 'white_concrete',
+		'concrete_powder': 'white_concrete_powder',
+		'sign': 'oak_sign',
+		'rose_red': 'red_dye',
+		'cactus_green': 'green_dye',
+		'dandelion_yellow': 'yellow_dye',
+		'grass_path': 'dirt_path',
+	}
