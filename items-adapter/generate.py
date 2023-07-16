@@ -15,8 +15,11 @@ def forward(old: json, new: json, legacy_conversion: Dict[str,str]) -> Dict[str,
 		new_equivalence = None
 		for search in new:
 			if search['displayName'] == item['displayName']:
+				if new_equivalence is not None:
+					print(f"[w] Two equal names found while searching for {item['displayName']}; searching by id instead")
+					new_equivalence = None
+					break
 				new_equivalence = search['name']
-				break
 
 		if new_equivalence is None:
 			# try re-using the same ID
@@ -52,7 +55,7 @@ def generate_json_entry(material: str, convertors: List[Tuple[str,Dict[str,str]]
 	aliases = [{'name': element, 'max-version': convertors[0][0]}]
 	for i in range(len(convertors)):
 		(version,conversion) = convertors[i]
-		prior_version = (None if i == 0 else convertors[i-1][0])
+		prior_version = (convertors[0][0] if i == 0 else convertors[i-1][0])
 		if conversion is None:
 			aliases[-1]['min-version'] = prior_version # last append
 			break
@@ -60,9 +63,10 @@ def generate_json_entry(material: str, convertors: List[Tuple[str,Dict[str,str]]
 		try:
 			if element != conversion[element]:
 				element = conversion[element] # save the other element
+				aliases[-1]['min-version'] = prior_version
 				aliases.append({'name': element, 'max-version': version})
 		except KeyError as e:
-			if i == 0: raise e # not found in the first version
+			#if i == 0: raise e # not found in the first version
 			aliases[-1]['min-version'] = prior_version
 			break
 
@@ -70,6 +74,12 @@ def generate_json_entry(material: str, convertors: List[Tuple[str,Dict[str,str]]
 		'name': material,
 		'aliases': aliases
 	}
+
+def get_material_list(latest_items: json) -> List[str]:
+	r = []
+	for latest_item in latest_items:
+		r.append(latest_item['name'].upper())
+	return r
 
 def main():
 	versions = get_mc_data_versions()
@@ -88,12 +98,17 @@ def main():
 
 		conversion = forward(old, new, legacy_conversion)
 		conversion_queue.append(conversion)
+		
+	# now we got the files; keep the "base" versions
+	versions.remove('1.15.2') ; versions.append('1.15')
+	versions.remove('1.16.2') ; versions.append('1.16')
+	versions.sort(key=lambda s: list(map(int, s.split('.'))))
 
 	#conversion_queue.append( forward(get_mc_data(versions[-1]), get_spigot_enum_json(), legacy_conversion={}) ) # spigot to Mineflayer 1.20
 	#versions.append('Spigot')
 
 	convertors = list(reversed(list(zip(versions,conversion_queue))))
-	for mat in get_spigot_enum():
+	for mat in get_material_list(get_mc_data(versions[-1])):
 		print(generate_json_entry(mat, convertors))
 
 if __name__ == '__main__':
