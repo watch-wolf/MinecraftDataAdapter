@@ -81,6 +81,13 @@ def get_material_list(latest_items: json) -> List[str]:
 		r.append(latest_item['name'].upper())
 	return r
 
+def get_materials_list(versions: List[str], conversion_queue: List[Dict[str,str]]) -> List[Dict[str,Any]]:
+	r = []
+	convertors = list(reversed(list(zip(versions,conversion_queue))))
+	for mat in get_material_list(get_mc_data(versions[-1])):
+		r.append(generate_json_entry(mat, convertors))
+	return r
+
 def main():
 	versions = get_mc_data_versions()
 	versions.remove('1.7') # old version
@@ -104,12 +111,8 @@ def main():
 	versions.remove('1.16.2') ; versions.append('1.16')
 	versions.sort(key=lambda s: list(map(int, s.split('.'))))
 
-	#conversion_queue.append( forward(get_mc_data(versions[-1]), get_spigot_enum_json(), legacy_conversion={}) ) # spigot to Mineflayer 1.20
-	#versions.append('Spigot')
-
-	convertors = list(reversed(list(zip(versions,conversion_queue))))
-	for mat in get_material_list(get_mc_data(versions[-1])):
-		print(generate_json_entry(mat, convertors))
+	with open("items.json", "w") as f:
+		f.write( json.dumps(get_materials_list(versions, conversion_queue), indent=2) )
 
 if __name__ == '__main__':
 	main()
