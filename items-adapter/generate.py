@@ -57,7 +57,7 @@ def generate_json_entry(material: str, convertors: List[Tuple[str,Dict[str,str]]
 		(version,conversion) = convertors[i]
 		prior_version = (convertors[0][0] if i == 0 else convertors[i-1][0])
 		if conversion is None:
-			aliases[-1]['min-version'] = prior_version # last append
+			aliases[-1]['min-version'] = version # last append
 			break
 
 		try:
@@ -67,7 +67,7 @@ def generate_json_entry(material: str, convertors: List[Tuple[str,Dict[str,str]]
 				aliases.append({'name': element, 'max-version': version})
 		except KeyError as e:
 			#if i == 0: raise e # not found in the first version
-			aliases[-1]['min-version'] = prior_version
+			aliases[-1]['min-version'] = version
 			break
 
 	return {
@@ -104,6 +104,7 @@ def main():
 		new = get_mc_data(versions[i+1])
 
 		conversion = forward(old, new, legacy_conversion)
+		conversion['air'] = 'air' # add "no item"
 		conversion_queue.append(conversion)
 		
 	# now we got the files; keep the "base" versions
