@@ -55,16 +55,16 @@ def generate_json_entry(material: str, convertors: List[Tuple[str,Dict[str,str]]
 	aliases = [{'name': element, 'max-version': convertors[0][0]}]
 	for i in range(len(convertors)):
 		(version,conversion) = convertors[i]
-		prior_version = (convertors[0][0] if i == 0 else convertors[i-1][0])
 		if conversion is None:
 			aliases[-1]['min-version'] = version # last append
 			break
+		next_version = convertors[i+1][0]
 
 		try:
 			if element != conversion[element]:
 				element = conversion[element] # save the other element
-				aliases[-1]['min-version'] = prior_version
-				aliases.append({'name': element, 'max-version': version})
+				aliases[-1]['min-version'] = version
+				aliases.append({'name': element, 'max-version': next_version})
 		except KeyError as e:
 			#if i == 0: raise e # not found in the first version
 			aliases[-1]['min-version'] = version
